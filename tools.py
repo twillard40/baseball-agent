@@ -1,11 +1,13 @@
+
+from pybaseball import batting_stats_bref
+import requests
+
 # ============================================================
 # UTILITIES
 # Helper functions used by multiple tools
 # ============================================================
 
 #  get_player_id()
-
-from pybaseball import batting_stats_bref
 
 def get_player_id(player_name: str) -> int | None:
     """
@@ -26,32 +28,6 @@ def get_player_id(player_name: str) -> int | None:
 
 # call_mlb_api()
 
-import requests
-
-def call_mlb_api(url: str) -> dict | None:
-    """
-    Makes a GET request to the MLB Stats API.
-    Returns the JSON response as a dictionary, or None if the request fails.
-    """
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as e:
-        print(f"HTTP error: {e}")
-        return None
-    except requests.exceptions.ConnectionError:
-        print("Connection error -- check your internet connection")
-        return None
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return None
-
-# call_mlb_api()
-
-import requests
-
-# call_mlb_api()
 def call_mlb_api(url: str) -> dict | None:
     """
     Makes a GET request to the MLB Stats API.
