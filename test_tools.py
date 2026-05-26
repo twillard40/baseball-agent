@@ -1,4 +1,4 @@
-from tools import get_player_id, call_mlb_api, get_player_splits
+from tools import get_player_id, call_mlb_api, get_player_splits, get_batter_stats
 
 def test_single_match():
     assert get_player_id("Ohtani") == 660271
@@ -38,4 +38,21 @@ def test_get_player_splits_player_not_found():
 
 def test_get_player_splits_ambiguous_name():
     result = get_player_splits("Williams", "vl")
+    assert "Multiple players found" in result
+
+# # get_batter_stats
+
+from tools import get_player_id, call_mlb_api, get_player_splits, get_batter_stats
+
+def test_get_batter_stats_success():
+    result = get_batter_stats("Ohtani")
+    assert "AVG" in result
+    assert "OPS" in result
+
+def test_get_batter_stats_not_found():
+    result = get_batter_stats("zzzzz")
+    assert "No player found" in result
+
+def test_get_batter_stats_ambiguous():
+    result = get_batter_stats("Williams")
     assert "Multiple players found" in result

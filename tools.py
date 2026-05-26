@@ -111,6 +111,44 @@ def get_player_splits(player_name: str, split_code: str) -> str:
         f"AB: {stat['atBats']} | Hits: {stat['hits']} | Games: {stat['gamesPlayed']}"
     )
 
+# get_batter_stats
+
+@tool
+def get_batter_stats(player_name: str) -> str:
+    """
+    Retrieves current season batting stats for a player.
+    Use this when the user asks about a batter's overall season performance,
+    stats, or how a player is doing this year.
+
+    Args:
+        player_name: The full or partial name of the batter. Example: 'Ohtani' or 'Shohei Ohtani'.
+
+    Returns:
+        A formatted string with the player's current season stats,
+        or a message explaining why data is not available.
+    """
+    # Step 1 -- check player exists
+    player_id = get_player_id(player_name)
+
+    if player_id is None:
+        return f"No player found matching '{player_name}'. Check the spelling and try again."
+
+    if isinstance(player_id, list):
+        names = ", ".join(player_id)
+        return f"Multiple players found matching '{player_name}': {names}. Please be more specific."
+
+    # Step 2 -- get batting stats
+    stats = batting_stats_bref(2025)
+    match = stats[stats['Name'].str.contains(player_name, case=False, na=False)]
+    row = match.iloc[0]
+
+    # Step 3 -- format output
+    return (
+        f"{row['Name']} | {row['Tm']} | Age: {row['Age']}\n"
+        f"AVG: {row['BA']} | OBP: {row['OBP']} | SLG: {row['SLG']} | OPS: {row['OPS']}\n"
+        f"HR: {row['HR']} | RBI: {row['RBI']} | SB: {row['SB']}\n"
+        f"BB: {row['BB']} | SO: {row['SO']} | G: {row['G']} | PA: {row['PA']}"
+    )
 
 # ============================================================
 # PITCHING TOOLS
