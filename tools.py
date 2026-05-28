@@ -1,33 +1,51 @@
-
-from pybaseball import batting_stats_bref
+from pybaseball import batting_stats_bref, pitching_stats_bref
+from smolagents import tool
 import requests
 
 # ============================================================
 # UTILITIES
-# Helper functions used by multiple tools
 # ============================================================
 
-#  get_player_id()
-
-def get_player_id(player_name: str) -> int | None:
+# get_player_id()
+def get_player_id(player_name: str) -> int | list | None:
     """
-    Looks up a player's mlbID from the Baseball Reference batting stats.
+    Looks up a player's mlbID from the MLB Stats API.
     Returns the mlbID as an integer, or None if the player is not found.
     """
-    stats = batting_stats_bref(2025)
-    match = stats[stats['Name'].str.contains(player_name, case=False, na=False)]
+    url = f"https://statsapi.mlb.com/api/v1/people/search?names={player_name}&sportId=1"
+    data = call_mlb_api(url)
     
-    if match.empty:
+    if data is None or not data.get('people'):
         return None
     
-    if len(match) > 1:
-        # Multiple players matched -- return the list of names for disambiguation
-        return match['Name'].tolist()
+    people = data['people']
     
-    return int(match.iloc[0]['mlbID'])
+    if len(people) > 1:
+        return [p['fullName'] for p in people]
+    
+    return people[0]['id']
+
+# get_pitcher_id()
+def get_pitcher_id(player_name: str) -> int | None:
+    """
+    Looks up a pitcher's mlbID from the MLB Stats API.
+    Returns the mlbID as an integer, or None if the pitcher is not found.
+    """
+    url = f"https://statsapi.mlb.com/api/v1/people/search?names={player_name}&sportId=1"
+    data = call_mlb_api(url)
+    
+    if data is None or not data.get('people'):
+        return None
+    
+    people = data['people']
+    
+    if len(people) > 1:
+        return [p['fullName'] for p in people]
+    
+    return people[0]['id']
+   
 
 # call_mlb_api()
-
 def call_mlb_api(url: str) -> dict | None:
     """
     Makes a GET request to the MLB Stats API.
@@ -52,9 +70,6 @@ def call_mlb_api(url: str) -> dict | None:
 # ============================================================
 
 # get_player_splits()
-
-from smolagents import tool
-
 @tool
 def get_player_splits(player_name: str, split_code: str) -> str:
     """
@@ -76,7 +91,6 @@ def get_player_splits(player_name: str, split_code: str) -> str:
         A formatted string with the player's stats for that split situation,
         or a message explaining why data is not available.
     """
-    # Step 1 -- look up player ID
     player_id = get_player_id(player_name)
 
     if player_id is None:
@@ -86,20 +100,17 @@ def get_player_splits(player_name: str, split_code: str) -> str:
         names = ", ".join(player_id)
         return f"Multiple players found matching '{player_name}': {names}. Please be more specific."
 
-    # Step 2 -- call MLB Stats API
     url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=statSplits&season=2024&group=hitting&sitCodes={split_code}"
     data = call_mlb_api(url)
 
     if data is None:
         return f"Could not retrieve data for {player_name}. The MLB Stats API may be unavailable."
 
-    # Step 3 -- parse response
     splits = data['stats'][0]['splits']
 
     if not splits:
         return f"No split data found for '{player_name}' with split code '{split_code}'."
 
-    # Step 4 -- format output
     split = splits[0]
     stat = split['stat']
     description = split['split']['description']
@@ -111,8 +122,7 @@ def get_player_splits(player_name: str, split_code: str) -> str:
         f"AB: {stat['atBats']} | Hits: {stat['hits']} | Games: {stat['gamesPlayed']}"
     )
 
-# get_batter_stats
-
+# get_batter_stats()
 @tool
 def get_batter_stats(player_name: str) -> str:
     """
@@ -127,7 +137,6 @@ def get_batter_stats(player_name: str) -> str:
         A formatted string with the player's current season stats,
         or a message explaining why data is not available.
     """
-    # Step 1 -- check player exists
     player_id = get_player_id(player_name)
 
     if player_id is None:
@@ -137,18 +146,30 @@ def get_batter_stats(player_name: str) -> str:
         names = ", ".join(player_id)
         return f"Multiple players found matching '{player_name}': {names}. Please be more specific."
 
-    # Step 2 -- get batting stats
-    stats = batting_stats_bref(2025)
-    match = stats[stats['Name'].str.contains(player_name, case=False, na=False)]
-    row = match.iloc[0]
+    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=season&season=2025&group=hitting"
+    data = call_mlb_api(url)
 
-    # Step 3 -- format output
+    if data is None or not data['stats'][0]['splits']:
+        return f"No stats found for '{player_name}' this season."
+
+    stat = data['stats'][0]['splits'][0]['stat']
+
     return (
-        f"{row['Name']} | {row['Tm']} | Age: {row['Age']}\n"
-        f"AVG: {row['BA']} | OBP: {row['OBP']} | SLG: {row['SLG']} | OPS: {row['OPS']}\n"
-        f"HR: {row['HR']} | RBI: {row['RBI']} | SB: {row['SB']}\n"
-        f"BB: {row['BB']} | SO: {row['SO']} | G: {row['G']} | PA: {row['PA']}"
+        f"{player_name} | 2025 Season\n"
+        f"AVG: {stat['avg']} | OBP: {stat['obp']} | SLG: {stat['slg']} | OPS: {stat['ops']}\n"
+        f"HR: {stat['homeRuns']} | RBI: {stat['rbi']} | SB: {stat['stolenBases']}\n"
+        f"BB: {stat['baseOnBalls']} | SO: {stat['strikeOuts']} | G: {stat['gamesPlayed']} | PA: {stat['plateAppearances']}"
     )
+
+
+# ============================================================
+# PITCHING TOOLS
+# ============================================================
+
+
+# ============================================================
+# MATCHUP TOOLS
+# ==========================================
 
 # ============================================================
 # PITCHING TOOLS
