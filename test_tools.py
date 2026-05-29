@@ -1,4 +1,4 @@
-from tools import get_player_id, call_mlb_api, get_player_splits, get_batter_stats, get_pitcher_id
+from tools import get_player_id, call_mlb_api, get_player_splits, get_batter_stats, get_pitcher_id, get_pitcher_stats
 
 # get_player_id tests
 def test_single_match():
@@ -61,3 +61,16 @@ def test_get_pitcher_id_not_found():
 def test_get_pitcher_id_ambiguous():
     result = get_pitcher_id("Cole")
     assert isinstance(result, list)
+
+def test_get_pitcher_stats_success():
+    result = get_pitcher_stats("deGrom")
+    assert "ERA" in result
+    assert "WHIP" in result
+
+def test_get_pitcher_stats_not_found():
+    result = get_pitcher_stats("zzzzz")
+    assert "No pitcher found" in result
+
+def test_get_pitcher_stats_ambiguous():
+    result = get_pitcher_stats("Cole")
+    assert "Multiple pitchers found" in result

@@ -166,6 +166,48 @@ def get_batter_stats(player_name: str) -> str:
 # PITCHING TOOLS
 # ============================================================
 
+# get_pitcher_stats()
+# returns a pitcher's season stats. 
+
+# get_pitcher_stats()
+@tool
+def get_pitcher_stats(player_name: str) -> str:
+    """
+    Retrieves current season pitching stats for a pitcher.
+    Use this when the user asks about a pitcher's overall season performance,
+    ERA, strikeouts, or how a pitcher is doing this year.
+
+    Args:
+        player_name: The full or partial name of the pitcher. Example: 'deGrom' or 'Jacob deGrom'.
+
+    Returns:
+        A formatted string with the pitcher's current season stats,
+        or a message explaining why data is not available.
+    """
+    player_id = get_pitcher_id(player_name)
+
+    if player_id is None:
+        return f"No pitcher found matching '{player_name}'. Check the spelling and try again."
+
+    if isinstance(player_id, list):
+        names = ", ".join(player_id)
+        return f"Multiple pitchers found matching '{player_name}': {names}. Please be more specific."
+
+    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=season&season=2025&group=pitching"
+    data = call_mlb_api(url)
+
+    if data is None or not data['stats'][0]['splits']:
+        return f"No stats found for '{player_name}' this season."
+
+    stat = data['stats'][0]['splits'][0]['stat']
+
+    return (
+        f"{player_name} | 2025 Season\n"
+        f"ERA: {stat['era']} | WHIP: {stat['whip']} | W: {stat['wins']} | L: {stat['losses']}\n"
+        f"SO: {stat['strikeOuts']} | BB: {stat['baseOnBalls']} | IP: {stat['inningsPitched']}\n"
+        f"H: {stat['hits']} | HR: {stat['homeRuns']} | G: {stat['gamesPlayed']} | GS: {stat['gamesStarted']}"
+    )
+
 
 # ============================================================
 # MATCHUP TOOLS
