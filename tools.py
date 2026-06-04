@@ -100,7 +100,7 @@ def get_player_splits(player_name: str, split_code: str) -> str:
         names = ", ".join(player_id)
         return f"Multiple players found matching '{player_name}': {names}. Please be more specific."
 
-    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=statSplits&season=2024&group=hitting&sitCodes={split_code}"
+    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=statSplits&season=2025&group=hitting&sitCodes={split_code}"
     data = call_mlb_api(url)
 
     if data is None:
@@ -146,7 +146,7 @@ def get_batter_stats(player_name: str) -> str:
         names = ", ".join(player_id)
         return f"Multiple players found matching '{player_name}': {names}. Please be more specific."
 
-    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=season&season=2025&group=hitting"
+    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=season&season=2026&group=hitting"
     data = call_mlb_api(url)
 
     if data is None or not data['stats'][0]['splits']:
@@ -155,7 +155,7 @@ def get_batter_stats(player_name: str) -> str:
     stat = data['stats'][0]['splits'][0]['stat']
 
     return (
-        f"{player_name} | 2025 Season\n"
+        f"{player_name} | 2026 Season\n"
         f"AVG: {stat['avg']} | OBP: {stat['obp']} | SLG: {stat['slg']} | OPS: {stat['ops']}\n"
         f"HR: {stat['homeRuns']} | RBI: {stat['rbi']} | SB: {stat['stolenBases']}\n"
         f"BB: {stat['baseOnBalls']} | SO: {stat['strikeOuts']} | G: {stat['gamesPlayed']} | PA: {stat['plateAppearances']}"
@@ -193,7 +193,7 @@ def get_pitcher_stats(player_name: str) -> str:
         names = ", ".join(player_id)
         return f"Multiple pitchers found matching '{player_name}': {names}. Please be more specific."
 
-    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=season&season=2025&group=pitching"
+    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=season&season=2026&group=pitching"
     data = call_mlb_api(url)
 
     if data is None or not data['stats'][0]['splits']:
@@ -202,7 +202,7 @@ def get_pitcher_stats(player_name: str) -> str:
     stat = data['stats'][0]['splits'][0]['stat']
 
     return (
-        f"{player_name} | 2025 Season\n"
+        f"{player_name} | 2026 Season\n"
         f"ERA: {stat['era']} | WHIP: {stat['whip']} | W: {stat['wins']} | L: {stat['losses']}\n"
         f"SO: {stat['strikeOuts']} | BB: {stat['baseOnBalls']} | IP: {stat['inningsPitched']}\n"
         f"H: {stat['hits']} | HR: {stat['homeRuns']} | G: {stat['gamesPlayed']} | GS: {stat['gamesStarted']}"
