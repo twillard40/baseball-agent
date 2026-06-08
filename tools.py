@@ -1,49 +1,9 @@
-from pybaseball import batting_stats_bref, pitching_stats_bref
 from smolagents import tool
 import requests
 
 # ============================================================
 # UTILITIES
 # ============================================================
-
-# get_player_id()
-def get_player_id(player_name: str) -> int | list | None:
-    """
-    Looks up a player's mlbID from the MLB Stats API.
-    Returns the mlbID as an integer, or None if the player is not found.
-    """
-    url = f"https://statsapi.mlb.com/api/v1/people/search?names={player_name}&sportId=1"
-    data = call_mlb_api(url)
-    
-    if data is None or not data.get('people'):
-        return None
-    
-    people = data['people']
-    
-    if len(people) > 1:
-        return [p['fullName'] for p in people]
-    
-    return people[0]['id']
-
-# get_pitcher_id()
-def get_pitcher_id(player_name: str) -> int | None:
-    """
-    Looks up a pitcher's mlbID from the MLB Stats API.
-    Returns the mlbID as an integer, or None if the pitcher is not found.
-    """
-    url = f"https://statsapi.mlb.com/api/v1/people/search?names={player_name}&sportId=1"
-    data = call_mlb_api(url)
-    
-    if data is None or not data.get('people'):
-        return None
-    
-    people = data['people']
-    
-    if len(people) > 1:
-        return [p['fullName'] for p in people]
-    
-    return people[0]['id']
-   
 
 # call_mlb_api()
 def call_mlb_api(url: str) -> dict | None:
@@ -65,17 +25,55 @@ def call_mlb_api(url: str) -> dict | None:
         print(f"Unexpected error: {e}")
         return None
 
+# get_player_id()
+def get_player_id(player_name: str) -> int | list | None:
+    """
+    Looks up a player's mlbID from the MLB Stats API.
+    Returns the mlbID as an integer, or None if the player is not found.
+    """
+    url = f"https://statsapi.mlb.com/api/v1/people/search?names={player_name}&sportId=1"
+    data = call_mlb_api(url)
+    
+    if data is None or not data.get('people'):
+        return None
+    
+    people = data['people']
+    
+    if len(people) > 1:
+        return [p['fullName'] for p in people]
+    
+    return people[0]['id']
+
+# get_pitcher_id()
+def get_pitcher_id(player_name: str) -> int | list | None:
+    """
+    Looks up a pitcher's mlbID from the MLB Stats API.
+    Returns the mlbID as an integer, or None if the pitcher is not found.
+    """
+    url = f"https://statsapi.mlb.com/api/v1/people/search?names={player_name}&sportId=1"
+    data = call_mlb_api(url)
+    
+    if data is None or not data.get('people'):
+        return None
+    
+    people = data['people']
+    
+    if len(people) > 1:
+        return [p['fullName'] for p in people]
+    
+    return people[0]['id']
+
 # ============================================================
 # BATTING TOOLS
 # ============================================================
 
 # get_player_splits()
 @tool
-def get_player_splits(player_name: str, split_code: str) -> str:
+def get_player_splits(player_name: str, split_code: str) -> dict | str:
     """
     Retrieves batting split stats for a player against a specific situation.
     Use this when the user asks how a batter performs against left or right handed pitchers,
-    at home or away, during day or night games, or any other split situation.
+    at home or away, on the road, during day or night games, or any other split situation.
 
     Args:
         player_name: The full or partial name of the batter. Example: 'Ohtani' or 'Shohei Ohtani'.
@@ -83,13 +81,13 @@ def get_player_splits(player_name: str, split_code: str) -> str:
             vl = vs Left handed pitchers
             vr = vs Right handed pitchers
             h = Home games
-            a = Away games
+            a = Away games, road games, on the road
             d = Day games
             n = Night games
 
     Returns:
-        A formatted string with the player's stats for that split situation,
-        or a message explaining why data is not available.
+        A dictionary with the player's stats for that split situation,
+        or a string message explaining why data is not available.
     """
     player_id = get_player_id(player_name)
 
@@ -115,27 +113,37 @@ def get_player_splits(player_name: str, split_code: str) -> str:
     stat = split['stat']
     description = split['split']['description']
 
-    return (
-        f"{player_name} | {description}\n"
-        f"AVG: {stat['avg']} | OBP: {stat['obp']} | SLG: {stat['slg']} | OPS: {stat['ops']}\n"
-        f"HR: {stat['homeRuns']} | RBI: {stat['rbi']} | BB: {stat['baseOnBalls']} | SO: {stat['strikeOuts']}\n"
-        f"AB: {stat['atBats']} | Hits: {stat['hits']} | Games: {stat['gamesPlayed']}"
-    )
+    return {
+        "player": player_name,
+        "split": description,
+        "avg": stat['avg'],
+        "obp": stat['obp'],
+        "slg": stat['slg'],
+        "ops": stat['ops'],
+        "hr": stat['homeRuns'],
+        "rbi": stat['rbi'],
+        "walks": stat['baseOnBalls'],
+        "strikeouts": stat['strikeOuts'],
+        "at_bats": stat['atBats'],
+        "hits": stat['hits'],
+        "games": stat['gamesPlayed']
+    }
 
 # get_batter_stats()
 @tool
-def get_batter_stats(player_name: str) -> str:
+def get_batter_stats(player_name: str) -> dict | str:
     """
     Retrieves current season batting stats for a player.
     Use this when the user asks about a batter's overall season performance,
-    stats, or how a player is doing this year.
+    stats, or how a player is doing this year. Also use this for start/sit
+    decisions for position players and batters.
 
     Args:
         player_name: The full or partial name of the batter. Example: 'Ohtani' or 'Shohei Ohtani'.
 
     Returns:
-        A formatted string with the player's current season stats,
-        or a message explaining why data is not available.
+        A dictionary with the player's current season stats,
+        or a string message explaining why data is not available.
     """
     player_id = get_player_id(player_name)
 
@@ -154,24 +162,29 @@ def get_batter_stats(player_name: str) -> str:
 
     stat = data['stats'][0]['splits'][0]['stat']
 
-    return (
-        f"{player_name} | 2026 Season\n"
-        f"AVG: {stat['avg']} | OBP: {stat['obp']} | SLG: {stat['slg']} | OPS: {stat['ops']}\n"
-        f"HR: {stat['homeRuns']} | RBI: {stat['rbi']} | SB: {stat['stolenBases']}\n"
-        f"BB: {stat['baseOnBalls']} | SO: {stat['strikeOuts']} | G: {stat['gamesPlayed']} | PA: {stat['plateAppearances']}"
-    )
-
+    return {
+        "player": player_name,
+        "season": "2026",
+        "avg": stat['avg'],
+        "obp": stat['obp'],
+        "slg": stat['slg'],
+        "ops": stat['ops'],
+        "hr": stat['homeRuns'],
+        "rbi": stat['rbi'],
+        "sb": stat['stolenBases'],
+        "bb": stat['baseOnBalls'],
+        "so": stat['strikeOuts'],
+        "games": stat['gamesPlayed'],
+        "pa": stat['plateAppearances']
+    }
 
 # ============================================================
 # PITCHING TOOLS
 # ============================================================
 
 # get_pitcher_stats()
-# returns a pitcher's season stats. 
-
-# get_pitcher_stats()
 @tool
-def get_pitcher_stats(player_name: str) -> str:
+def get_pitcher_stats(player_name: str) -> dict | str:
     """
     Retrieves current season pitching stats for a pitcher.
     Use this when the user asks about a pitcher's overall season performance,
@@ -181,8 +194,8 @@ def get_pitcher_stats(player_name: str) -> str:
         player_name: The full or partial name of the pitcher. Example: 'deGrom' or 'Jacob deGrom'.
 
     Returns:
-        A formatted string with the pitcher's current season stats,
-        or a message explaining why data is not available.
+        A dictionary with the pitcher's current season stats,
+        or a string message explaining why data is not available.
     """
     player_id = get_pitcher_id(player_name)
 
@@ -201,22 +214,21 @@ def get_pitcher_stats(player_name: str) -> str:
 
     stat = data['stats'][0]['splits'][0]['stat']
 
-    return (
-        f"{player_name} | 2026 Season\n"
-        f"ERA: {stat['era']} | WHIP: {stat['whip']} | W: {stat['wins']} | L: {stat['losses']}\n"
-        f"SO: {stat['strikeOuts']} | BB: {stat['baseOnBalls']} | IP: {stat['inningsPitched']}\n"
-        f"H: {stat['hits']} | HR: {stat['homeRuns']} | G: {stat['gamesPlayed']} | GS: {stat['gamesStarted']}"
-    )
-
-
-# ============================================================
-# MATCHUP TOOLS
-# ==========================================
-
-# ============================================================
-# PITCHING TOOLS
-# ============================================================
-
+    return {
+        "player": player_name,
+        "season": "2026",
+        "era": stat['era'],
+        "whip": stat['whip'],
+        "wins": stat['wins'],
+        "losses": stat['losses'],
+        "strikeouts": stat['strikeOuts'],
+        "walks": stat['baseOnBalls'],
+        "innings_pitched": stat['inningsPitched'],
+        "hits_allowed": stat['hits'],
+        "home_runs_allowed": stat['homeRuns'],
+        "games": stat['gamesPlayed'],
+        "games_started": stat['gamesStarted']
+    }
 
 # ============================================================
 # MATCHUP TOOLS

@@ -24,8 +24,9 @@ def test_call_mlb_api_bad_url():
 # get_player_splits tests
 def test_get_player_splits_vs_left():
     result = get_player_splits("Ohtani", "vl")
-    assert "AVG" in result
-    assert "OPS" in result
+    assert isinstance(result, dict)
+    assert "avg" in result
+    assert "ops" in result
 
 def test_get_player_splits_player_not_found():
     result = get_player_splits("zzzzz", "vl")
@@ -38,8 +39,9 @@ def test_get_player_splits_ambiguous_name():
 # get_batter_stats tests
 def test_get_batter_stats_success():
     result = get_batter_stats("Ohtani")
-    assert "AVG" in result
-    assert "OPS" in result
+    assert isinstance(result, dict)
+    assert "avg" in result
+    assert "ops" in result
 
 def test_get_batter_stats_not_found():
     result = get_batter_stats("zzzzz")
@@ -64,8 +66,9 @@ def test_get_pitcher_id_ambiguous():
 
 def test_get_pitcher_stats_success():
     result = get_pitcher_stats("deGrom")
-    assert "ERA" in result
-    assert "WHIP" in result
+    assert isinstance(result, dict)
+    assert "era" in result
+    assert "whip" in result
 
 def test_get_pitcher_stats_not_found():
     result = get_pitcher_stats("zzzzz")
