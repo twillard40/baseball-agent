@@ -1,4 +1,4 @@
-from smolagents import LiteLLMModel, CodeAgent
+from smolagents import LiteLLMModel, ToolCallingAgent
 from tools import get_player_splits, get_batter_stats, get_pitcher_stats
 from config import SYSTEM_PROMPT
 
@@ -7,10 +7,10 @@ from config import SYSTEM_PROMPT
 # ============================================================
 
 model = LiteLLMModel(
-    model_id="ollama_chat/llama3.2",
+    model_id="ollama_chat/qwen2.5:7b",
     api_base="http://127.0.0.1:11434",
     num_ctx=8192,
-    temperature=0.7,
+    temperature=0.3,
 )
 
 # ============================================================
@@ -27,17 +27,18 @@ tools = [
 # AGENT
 # ============================================================
 
-agent = CodeAgent(
-    model=model,
-    tools=tools,
-    instructions=SYSTEM_PROMPT,
-    max_steps=7,
-)
+
+agent = ToolCallingAgent(
+       model=model,
+       tools=tools,
+       instructions=SYSTEM_PROMPT,
+       max_steps=10,
+   )
 
 # ============================================================
 # RUN
 # ============================================================
 
 if __name__ == "__main__":
-    response = agent.run("Is Roman Anthony a good start on the road?")
+    response = agent.run("How does Roman Anthony perform in away games?")
     print(response)

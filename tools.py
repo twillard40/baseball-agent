@@ -116,17 +116,17 @@ def get_player_splits(player_name: str, split_code: str) -> dict | str:
     return {
         "player": player_name,
         "split": description,
-        "avg": stat['avg'],
-        "obp": stat['obp'],
-        "slg": stat['slg'],
-        "ops": stat['ops'],
-        "hr": stat['homeRuns'],
-        "rbi": stat['rbi'],
-        "walks": stat['baseOnBalls'],
-        "strikeouts": stat['strikeOuts'],
-        "at_bats": stat['atBats'],
-        "hits": stat['hits'],
-        "games": stat['gamesPlayed']
+        "avg": float(stat['avg']),
+        "obp": float(stat['obp']),
+        "slg": float(stat['slg']),
+        "ops": float(stat['ops']),
+        "hr": int(stat['homeRuns']),
+        "rbi": int(stat['rbi']),
+        "walks": int(stat['baseOnBalls']),
+        "strikeouts": int(stat['strikeOuts']),
+        "at_bats": int(stat['atBats']),
+        "hits": int(stat['hits']),
+        "games": int(stat['gamesPlayed'])
     }
 
 # get_batter_stats()
@@ -165,17 +165,17 @@ def get_batter_stats(player_name: str) -> dict | str:
     return {
         "player": player_name,
         "season": "2026",
-        "avg": stat['avg'],
-        "obp": stat['obp'],
-        "slg": stat['slg'],
-        "ops": stat['ops'],
-        "hr": stat['homeRuns'],
-        "rbi": stat['rbi'],
-        "sb": stat['stolenBases'],
-        "bb": stat['baseOnBalls'],
-        "so": stat['strikeOuts'],
-        "games": stat['gamesPlayed'],
-        "pa": stat['plateAppearances']
+        "avg": float(stat['avg']),
+        "obp": float(stat['obp']),
+        "slg": float(stat['slg']),
+        "ops": float(stat['ops']),
+        "hr": int(stat['homeRuns']),
+        "rbi": int(stat['rbi']),
+        "sb": int(stat['stolenBases']),
+        "bb": int(stat['baseOnBalls']),
+        "so": int(stat['strikeOuts']),
+        "games": int(stat['gamesPlayed']),
+        "pa": int(stat['plateAppearances'])
     }
 
 # ============================================================
@@ -217,17 +217,17 @@ def get_pitcher_stats(player_name: str) -> dict | str:
     return {
         "player": player_name,
         "season": "2026",
-        "era": stat['era'],
-        "whip": stat['whip'],
-        "wins": stat['wins'],
-        "losses": stat['losses'],
-        "strikeouts": stat['strikeOuts'],
-        "walks": stat['baseOnBalls'],
-        "innings_pitched": stat['inningsPitched'],
-        "hits_allowed": stat['hits'],
-        "home_runs_allowed": stat['homeRuns'],
-        "games": stat['gamesPlayed'],
-        "games_started": stat['gamesStarted']
+        "era": float(stat['era']),
+        "whip": float(stat['whip']),
+        "wins": int(stat['wins']),
+        "losses": int(stat['losses']),
+        "strikeouts": int(stat['strikeOuts']),
+        "walks": int(stat['baseOnBalls']),
+        "innings_pitched": float(stat['inningsPitched']),
+        "hits_allowed": int(stat['hits']),
+        "home_runs_allowed": int(stat['homeRuns']),
+        "games": int(stat['gamesPlayed']),
+        "games_started": int(stat['gamesStarted'])
     }
 
 # ============================================================
