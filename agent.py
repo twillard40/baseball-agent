@@ -1,15 +1,16 @@
 from smolagents import LiteLLMModel, ToolCallingAgent
+from dotenv import load_dotenv
 from tools import get_player_splits, get_batter_stats, get_pitcher_stats
 from config import SYSTEM_PROMPT
+
+load_dotenv()
 
 # ============================================================
 # MODEL CONFIGURATION
 # ============================================================
 
 model = LiteLLMModel(
-    model_id="ollama_chat/qwen2.5:7b",
-    api_base="http://127.0.0.1:11434",
-    num_ctx=8192,
+    model_id="anthropic/claude-haiku-4-5",
     temperature=0.3,
 )
 
@@ -27,13 +28,12 @@ tools = [
 # AGENT
 # ============================================================
 
-
 agent = ToolCallingAgent(
-       model=model,
-       tools=tools,
-       instructions=SYSTEM_PROMPT,
-       max_steps=10,
-   )
+    model=model,
+    tools=tools,
+    instructions=SYSTEM_PROMPT,
+    max_steps=10,
+)
 
 # ============================================================
 # RUN
