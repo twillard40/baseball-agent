@@ -98,7 +98,7 @@ def get_player_splits(player_name: str, split_code: str) -> dict | str:
         names = ", ".join(player_id)
         return f"Multiple players found matching '{player_name}': {names}. Please be more specific."
 
-    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=statSplits&season=2025&group=hitting&sitCodes={split_code}"
+    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=statSplits&season=2026&group=hitting&sitCodes={split_code}"
     data = call_mlb_api(url)
 
     if data is None:
